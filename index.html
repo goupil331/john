@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPhone Simulator - Surf Edition</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: white;
+        }
+
+        /* Conteneur de l'iPhone */
+        .iphone-container {
+            width: 375px;
+            height: 812px;
+            background: url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809') center/cover;
+            border-radius: 40px;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            border: 12px solid #333;
+            overflow: hidden;
+        }
+
+        /* Île dynamique (Dynamic Island) */
+        .dynamic-island {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 110px;
+            height: 30px;
+            background: black;
+            border-radius: 20px;
+            z-index: 100;
+        }
+
+        /* Écrans */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.4s ease-in-out, opacity 0.4s;
+            display: none;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 1. ÉCRAN DE VERROUILLAGE */
+        #lock-screen {
+            align-items: center;
+            justify-content: space-between;
+            padding: 60px 20px 30px 20px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .lock-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .time {
+            font-size: 72px;
+            font-weight: 200;
+        }
+
+        .date {
+            font-size: 18px;
+            font-weight: 500;
+            margin-top: -10px;
+        }
+
+        .swipe-up-zone {
+            width: 100%;
+            text-align: center;
+            cursor: pointer;
+            animation: bounce 2s infinite;
+        }
+
+        .swipe-bar {
+            width: 140px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 3px;
+            margin: 10px auto 0 auto;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        /* 2. ÉCRAN CODE DE DÉVERROUILLAGE */
+        #passcode-screen {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .passcode-title {
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        .dots-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 60px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border: 1.5px solid white;
+            border-radius: 50%;
+            transition: background 0.1s;
+        }
+
+        .dot.filled {
+            background: white;
+        }
+
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .key {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+
+        .key:active {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .error-message {
+            color: #ff3b30;
+            margin-top: 10px;
+            font-size: 14px;
+            min-height: 20px;
+            visibility: hidden;
+        }
+
+        /* 3. ÉCRAN D'ACCUEIL */
+        #home-screen {
+            padding: 60px 24px;
+        }
+
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .app-icon-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .app-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            margin-bottom: 5px;
+            font-size: 30px;
+        }
+
+        .app-icon.messages {
+            background: linear-gradient(#34c759, #248a3d);
+        }
+
+        .app-icon.surf-game {
+            background: linear-gradient(#2fbdff, #0051a8);
+        }
+
+        .app-icon svg {
+            width: 35px;
+            height: 35px;
+            fill: white;
+        }
+
+        .app-name {
+            font-size: 12px;
+            text-align: center;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+        }
+
+        /* 4. APPLICATION MESSAGES */
+        #messages-app {
+            background: #000;
+            color: white;
+            z-index: 10;
+        }
+
+        .app-header {
+            padding: 50px 20px 15px 20px;
+            border-bottom: 1px solid #222;
+            display: flex;
+            align-items: center;
+            background: #121212;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: #007aff;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .contact-info {
+            flex-grow: 1;
+            text-align: center;
+            margin-right: 50px;
+        }
+
+        .contact-name {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .chat-body {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 10px 16px;
+            border-radius: 20px;
+            font-size: 15px;
+            line-height: 1.4;
+        }
+
+        .message-bubble.received {
+            background: #262629;
+            align-self: flex-start;
+        }
+
+        .message-bubble.sent {
+            background: #007aff;
+            align-self: flex-end;
+        }
+
+        .chat-input-area {
+            padding: 10px 20px 30px 20px;
+            border-top: 1px solid #222;
+            display: flex;
+            align-items: center;
+            background: #121212;
+        }
+
+        .chat-input {
+            background: #1c1c1e;
+            border: 1px solid #3a3a3c;
+            border-radius: 20px;
+            padding: 8px 15px;
+            color: white;
+            flex-grow: 1;
+            outline: none;
+            font-size: 15px;
+        }
+
+        /* 5. JEU SURF RUSH */
+        #surf-game-app {
+            background: #0051a8;
+            z-index: 10;
+        }
+
+        .game-container {
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(#7cd2ff, #0072ff);
+            cursor: pointer;
+        }
+
+        #surfer {
+            position: absolute;
+            left: 50px;
+            top: 250px;
+            font-size: 35px;
+            width: 40px;
+            height: 40px;
+            transform-origin: center;
+            transition: transform 0.1s;
+            z-index: 5;
+        }
+
+        .obstacle {
+            position: absolute;
+            right: -60px;
+            font-size: 35px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .score-display {
+            position: absolute;
+            top: 100px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 40px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+            z-index: 10;
+        }
+
+        .game-menu {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+        }
+
+        .game-menu p {
+            font-size: 18px;
+            margin-bottom: 20px;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .game-btn {
+            background: #ff9500;
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        /* Vagues décoratives en bas du jeu */
+        .waves-decor {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 60px;
+            background: rgba(255,255,255,0.2);
+            border-top: 4px dotted rgba(255,255,255,0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="iphone-container">
+        <div class="dynamic-island"></div>
+
+        <div id="lock-screen" class="screen active">
+            <div style="text-align: center;">
+                <div class="lock-icon">🔒</div>
+                <div class="time" id="current-time">09:41</div>
+                <div class="date" id="current-date">Mardi 19 Mai</div>
+            </div>
+            
+            <div class="swipe-up-zone" onclick="goToPasscode()">
+                <p style="font-size: 14px; font-weight: 500;">Balayer vers le haut pour déverrouiller</p>
+                <div class="swipe-bar"></div>
+            </div>
+        </div>
+
+        <div id="passcode-screen" class="screen">
+            <div class="passcode-title">Saisissez le code</div>
+            <div class="dots-container">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+            
+            <div class="keypad">
+                <div class="key" onclick="pressKey('1')">1</div>
+                <div class="key" onclick="pressKey('2')">2</div>
+                <div class="key" onclick="pressKey('3')">3</div>
+                <div class="key" onclick="pressKey('4')">4</div>
+                <div class="key" onclick="pressKey('5')">5</div>
+                <div class="key" onclick="pressKey('6')">6</div>
+                <div class="key" onclick="pressKey('7')">7</div>
+                <div class="key" onclick="pressKey('8')">8</div>
+                <div class="key" onclick="pressKey('9')">9</div>
+                <div></div>
+                <div class="key" onclick="pressKey('0')">0</div>
+            </div>
+            <div class="error-message" id="error-msg">Code incorrect. Réessayez.</div>
+        </div>
+
+        <div id="home-screen" class="screen">
+            <div class="apps-grid">
+                <div class="app-icon-wrapper" onclick="openApp('messages-app')">
+                    <div class="app-icon messages">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.02 2 11c0 2.9 1.57 5.47 4 7.05V22l4.1-2.45c.61.16 1.25.25 1.9.25 5.48 0 10-4.02 10-9s-4.52-9-10-9z"/>
+                        </svg>
+                    </div>
+                    <div class="app-name">Messages</div>
+                </div>
+
+                <div class="app-icon-wrapper" onclick="openApp('surf-game-app'); initGame();">
+                    <div class="app-icon surf-game">🏄‍♂️</div>
+                    <div class="app-name">Surf Rush</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="messages-app" class="screen">
+            <div class="app-header">
+                <button class="back-btn" onclick="closeApp('messages-app')">
+                    <span style="font-size: 20px;">‹</span> Messages
+                </button>
+                <div class="contact-info">
+                    <div class="contact-name">François</div>
+                </div>
+            </div>
+            
+            <div class="chat-body">
+                <div class="message-bubble received">Salut ! Tu as vu les prévisions pour ce week-end ? Y'a une super houle qui rentre.</div>
+                <div class="message-bubble sent">Carrément ! J'ai vu ça. Les conditions ont l'air parfaites pour une session surf samedi matin.</div>
+                <div class="message-bubble received">Grave ! On se capte à quelle heure au spot ? J'embarque ma 6'2.</div>
+                <div class="message-bubble sent">Vers 7h30 pour éviter le monde ? Le vent sera offshore en plus 🏄‍♂️</div>
+            </div>
+
+            <div class="chat-input-area">
+                <input type="text" class="chat-input" placeholder="iMessage" disabled>
+            </div>
+        </div>
+
+        <div id="surf-game-app" class="screen">
+            <div class="app-header" style="background: #7cd2ff; border: none;">
+                <button class="back-btn" onclick="closeApp('surf-game-app'); stopGame();" style="color: #004494;">
+                    <span style="font-size: 20px;">‹</span> Quitter
+                </button>
+            </div>
+
+            <div class="game-container" id="game-area" onclick="surferJump()">
+                <div class="score-display" id="game-score">0</div>
+                
+                <div id="surfer">🏄‍♂️</div>
+                
+                <div class="waves-decor"></div>
+
+                <div class="game-menu" id="game-menu">
+                    <p id="menu-text">Évite les requins !<br>Appuie pour sauter et rester en l'air.</p>
+                    <button class="game-btn" id="start-btn" onclick="startGame(event)">Jouer</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- HORLOGE ---
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours().toString().padStart(2, '0');
+            let minutes = now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('current-time').textContent = `${hours}:${minutes}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // --- NAVIGATION ---
+        function changeScreen(currentId, nextId) {
+            document.getElementById(currentId).classList.remove('active');
+            document.getElementById(nextId).classList.add('active');
+        }
+
+        function goToPasscode() {
+            changeScreen('lock-screen', 'passcode-screen');
+        }
+
+        function openApp(appId) {
+            changeScreen('home-screen', appId);
+        }
+
+        function closeApp(appId) {
+            changeScreen(appId, 'home-screen');
+        }
+
+        // --- CODE DE DÉVERROUILLAGE ---
+        const CORRECT_CODE = "1234";
+        let enteredCode = "";
+
+        function pressKey(num) {
+            if (enteredCode.length < 4) {
+                enteredCode += num;
+                updateDots();
+                
+                if (enteredCode.length === 4) {
+                    setTimeout(checkPasscode, 300);
+                }
+            }
+        }
+
+        function updateDots() {
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, index) => {
+                if (index < enteredCode.length) {
+                    dot.classList.add('filled');
+                } else {
+                    dot.classList.remove('filled');
+                }
+            });
+        }
+
+        function checkPasscode() {
+            if (enteredCode === CORRECT_CODE) {
+                document.getElementById('error-msg').style.visibility = 'hidden';
+                changeScreen('passcode-screen', 'home-screen');
+            } else {
+                document.getElementById('error-msg').style.visibility = 'visible';
+                enteredCode = "";
+                updateDots();
+            }
+        }
+
+        // --- CODE DU JEU : SURF RUSH (Flappy Bird style) ---
+        let surferY = 250;
+        let velocity = 0;
+        let gravity = 0.4;
+        let jumpStrength = -7;
+        let isPlaying = false;
+        let score = 0;
+        let obstacles = [];
+        let gameLoopId;
+        let obstacleSpawnId;
+
+        const surferElement = document.getElementById('surfer');
+        const gameArea = document.getElementById('game-area');
+        const scoreDisplay = document.getElementById('game-score');
+        const gameMenu = document.getElementById('game-menu');
+        const startBtn = document.getElementById('start-btn');
+        const menuText = document.getElementById('menu-text');
+
+        // Permet aussi de jouer avec la barre d'espace
+        window.addEventListener('keydown', function(e) {
+            if (e.code === "Space" && document.getElementById('surf-game-app').classList.contains('active')) {
+                if (!isPlaying) {
+                    startGame(e);
+                } else {
+                    surferJump();
+                }
+            }
+        });
+
+        function initGame() {
+            stopGame();
+            surferY = 250;
+            velocity = 0;
+            score = 0;
+            surferElement.style.top = surferY + 'px';
+            surferElement.style.transform = 'rotate(0deg)';
+            scoreDisplay.textContent = score;
+            gameMenu.style.display = 'flex';
+            menuText.innerHTML = "Évite les requins !<br>Appuie pour surfer vers le haut.";
+            startBtn.textContent = "Surf !";
+            
+            // Nettoyer les anciens obstacles
+            document.querySelectorAll('.obstacle').forEach(el => el.remove());
+            obstacles = [];
+        }
+
+        function startGame(event) {
+            if(event) event.stopPropagation(); // Évite de déclencher un saut immédiatement au clic du bouton
+            
+            initGame();
+            gameMenu.style.display = 'none';
+            isPlaying = true;
+            
+            // Boucle principale du jeu
+            gameLoopId = requestAnimationFrame(updateGame);
+            // Spawn des obstacles toutes les 2 secondes
+            obstacleSpawnId = setInterval(spawnObstacle, 2000);
+        }
+
+        function stopGame() {
+            isPlaying = false;
+            cancelAnimationFrame(gameLoopId);
+            clearInterval(obstacleSpawnId);
+        }
+
+        function surferJump() {
+            if (!isPlaying) return;
+            velocity = jumpStrength;
+        }
+
+        function spawnObstacle() {
+            if (!isPlaying) return;
+
+            const obstacle = document.createElement('div');
+            obstacle.classList.add('obstacle');
+            obstacle.textContent = '🦈';
+            
+            // Position verticale aléatoire (en évitant le haut et le bas de l'écran de l'iPhone)
+            const randomY = Math.floor(Math.random() * (500 - 150)) + 150;
+            obstacle.style.top = randomY + 'px';
+            obstacle.style.right = '-60px';
+            
+            gameArea.appendChild(obstacle);
+            obstacles.push({
+                element: obstacle,
+                x: 375, // Largeur de l'écran simulé
+                y: randomY,
+                passed: false
+            });
+        }
+
+        function updateGame() {
+            if (!isPlaying) return;
+
+            // Application de la gravité sur le surfeur
+            velocity += gravity;
+            surferY += velocity;
+            surferElement.style.top = surferY + 'px';
+
+            // Inclinaison stylée du surfeur selon sa vitesse
+            let rotation = velocity * 3;
+            surferElement.style.transform = `rotate(${Math.max(-20, Math.min(rotation, 40))}deg)`;
+
+            // Collision avec les limites de l'écran (le ciel ou l'eau)
+            if (surferY > 700 || surferY < 80) {
+                gameOver();
+                return;
+            }
+
+            // Déplacement des requins (obstacles)
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                let obs = obstacles[i];
+                obs.x -= 3.5; // Vitesse de défilement des requins
+                obs.element.style.left = obs.x + 'px';
+
+                // Gestion du score (quand le requin passe derrière le surfeur)
+                if (!obs.passed && obs.x < 50) {
+                    obs.passed = true;
+                    score++;
+                    scoreDisplay.textContent = score;
+                }
+
+                // Détection de collision (Hitbox simplifiée)
+                if (obs.x > 20 && obs.x < 80 && surferY > obs.y - 30 && surferY < obs.y + 40) {
+                    gameOver();
+                    return;
+                }
+
+                // Supprimer les obstacles sortis de l'écran
+                if (obs.x < -60) {
+                    obs.element.remove();
+                    obstacles.splice(i, 1);
+                }
+            }
+
+            gameLoopId = requestAnimationFrame(updateGame);
+        }
+
+        function gameOver() {
+            stopGame();
+            gameMenu.style.display = 'flex';
+            menuText.innerHTML = `Game Over ! 🦈<br>Tu as esquivé ${score} requin${score > 1 ? 's' : ''}.`;
+            startBtn.textContent = "Recommencer";
+        }
+    </script>
+</body>
+</html>
