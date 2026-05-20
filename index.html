@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>iPhone Simulator - Feature Update</title>
+    <title>iPhone Simulator - Admin Update</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
@@ -36,7 +36,7 @@
             padding: 10px;
         }
 
-        /* CONTENEUR IPHONE FIXE RETENU (Évite le scroll Safari) */
+        /* CONTENEUR IPHONE FIXE (680px) */
         .iphone-container {
             width: 375px;
             height: 680px; 
@@ -96,7 +96,7 @@
         }
 
         /* ==========================================================================
-           1. LOCK SCREEN
+           1. LOCK SCREEN & PASSCODE
            ========================================================================== */
         #lock-screen {
             align-items: center;
@@ -129,9 +129,6 @@
             60% { transform: translateY(-4px); }
         }
 
-        /* ==========================================================================
-           2. PASSCODE SCREEN
-           ========================================================================== */
         #passcode-screen {
             background: rgba(0, 0, 0, 0.55);
             backdrop-filter: blur(30px);
@@ -177,7 +174,7 @@
         }
 
         /* ==========================================================================
-           3. HOME SCREEN
+           2. HOME SCREEN 
            ========================================================================== */
         #home-screen {
             padding: 50px 24px;
@@ -208,8 +205,9 @@
         .app-icon.messages { background: linear-gradient(#34c759, #248a3d); }
         .app-icon.surf-game { background: linear-gradient(#2fbdff, #0051a8); }
         .app-icon.maps { background: #ffffff; overflow: hidden; }
-        .app-icon.photos { background: #ffffff; color: #ff3b30; } /* Couleur d'icône type iOS Photos */
-        .app-icon.surf-world-tour { background: #111111; color: #ffffff; border: 1px solid #333; font-weight: bold; font-size: 18px; }
+        .app-icon.photos { background: #ffffff; color: #ff3b30; } 
+        .app-icon.surf-world-tour { background: #000000; color: #ffffff; font-weight: bold; border: 1px solid #333; font-size: 20px; }
+        .app-icon.settings { background: linear-gradient(#b3b3b3, #7a7a7a); color: white; font-size: 32px; } /* Roue crantée réglages */
         
         .app-name {
             font-size: 11px;
@@ -218,10 +216,9 @@
         }
 
         /* ==========================================================================
-           4. MESSAGES APP (Thème Clair)
+           3. MESSAGES APP (Thème Clair)
            ========================================================================== */
         #messages-app { background: #ffffff; color: #000000; }
-        
         #messages-app .app-header {
             background: var(--ios-light-gray);
             border-bottom: 1px solid var(--ios-border-gray);
@@ -240,6 +237,10 @@
             cursor: pointer;
         }
         .chat-row:active { background-color: var(--ios-light-gray); }
+        
+        /* Masqué par défaut si l'admin ne l'active pas */
+        #row-marc { display: none; } 
+
         .avatar {
             width: 45px;
             height: 45px;
@@ -302,7 +303,7 @@
         }
 
         /* ==========================================================================
-           5. SURF RUSH GAME 
+           4. SURF RUSH GAME 
            ========================================================================== */
         #surf-game-app { background: #0051a8; color: white; }
         .game-container {
@@ -365,7 +366,7 @@
         }
 
         /* ==========================================================================
-           6. MAPS APP (Leaflet)
+           5. MAPS APP (Leaflet)
            ========================================================================== */
         #maps-app { background: #ffffff; }
         #map {
@@ -380,7 +381,7 @@
         }
 
         /* ==========================================================================
-           Nouveau - 7. APPLICATION PHOTOS (Galerie + Plein Écran)
+           6. PHOTOS APP
            ========================================================================== */
         #photos-app { background: #ffffff; color: #000000; }
         #photos-app .app-header { background: #ffffff; border-bottom: 1px solid var(--ios-border-gray); }
@@ -399,11 +400,7 @@
             object-fit: cover;
             cursor: pointer;
             border-radius: 4px;
-            transition: opacity 0.1s;
         }
-        .gallery-item:active { opacity: 0.7; }
-
-        /* Superposition plein écran pour visionner une photo */
         .photo-lightbox {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -429,65 +426,110 @@
         }
 
         /* ==========================================================================
-           Nouveau - 8. APPLICATION SURF WORLD TOUR (Invitation)
+           7. SURF WORLD TOUR APP (Retour Version 1 originelle comme demandé)
            ========================================================================== */
-        #surf-wt-app { background: #0b0f19; color: #ffffff; }
-        #surf-wt-app .app-header { background: #131a2a; border-bottom: 1px solid #1e293b; }
-        #surf-wt-app .back-btn { color: #38bdf8; }
+        #surf-wt-app { background: #000; color: #fff; text-align: center; }
+        #surf-wt-app .app-header { background: #000; border-bottom: 1px solid #333; }
+        #surf-wt-app .back-btn { color: #fff; }
+        #surf-wt-app .app-title { color: #fff; }
 
-        .wt-container {
+        .invite-card-v1 { 
+            flex-grow: 1; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            padding: 30px; 
+            background: url('https://images.unsplash.com/photo-1502680390469-be75c86b636f?auto=format&fit=crop&w=400&q=80') center/cover; 
+            position: relative; 
+        }
+        .invite-card-v1::before { 
+            content: ""; 
+            position: absolute; 
+            top: 0; left: 0; right: 0; bottom: 0; 
+            background: rgba(0,0,0,0.6); 
+        }
+        .invite-content-v1 { position: relative; z-index: 1; }
+        .btn-accept-v1 { 
+            background: var(--ios-blue); 
+            color: white; 
+            border: none; 
+            padding: 15px 40px; 
+            border-radius: 30px; 
+            font-weight: bold; 
+            margin-top: 20px; 
+            cursor: pointer; 
+        }
+
+        /* ==========================================================================
+           Nouveau - 8. APPLICATION RÉGLAGES (SETTINGS iOS)
+           ========================================================================== */
+        #settings-app { background: var(--ios-light-gray); color: #000000; }
+        #settings-app .app-header { background: #ffffff; border-bottom: 1px solid var(--ios-border-gray); }
+        
+        .settings-container {
             flex-grow: 1;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            overflow-y: auto;
+            padding: 16px 0;
         }
-        .invite-card {
-            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-            width: 100%;
-            padding: 24px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .invite-badge {
-            background: #f59e0b;
-            color: #000000;
-            font-size: 11px;
-            font-weight: bold;
-            padding: 4px 12px;
-            border-radius: 10px;
-            display: inline-block;
-            margin-bottom: 14px;
-            letter-spacing: 1px;
-        }
-        .invite-title { font-size: 20px; font-weight: 800; margin-bottom: 6px; letter-spacing: 0.5px; }
-        .invite-location { font-size: 14px; color: #e0f2fe; margin-bottom: 20px; font-style: italic; }
-        .invite-details {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 12px;
-            border-radius: 10px;
-            font-size: 13px;
-            text-align: left;
-            margin-bottom: 20px;
-            line-height: 1.5;
-        }
-        .btn-action {
+        .settings-group {
             background: #ffffff;
-            color: #0369a1;
-            border: none;
-            width: 100%;
-            padding: 12px;
-            border-radius: 12px;
-            font-weight: bold;
-            font-size: 15px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-top: 0.5px solid var(--ios-border-gray);
+            border-bottom: 0.5px solid var(--ios-border-gray);
+            margin-bottom: 30px;
         }
-        .btn-action:active { background: #f0f9ff; }
+        .settings-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 0.5px solid var(--ios-border-gray);
+            background: #ffffff;
+        }
+        .settings-row:last-child { border-bottom: none; }
+        .settings-left { display: flex; align-items: center; gap: 12px; font-size: 16px; }
+        .settings-icon { font-size: 20px; }
+        .settings-right { color: #8e8e93; font-size: 15px; display: flex; align-items: center; gap: 6px; }
+        
+        /* Bouton interactif cliquable pour le mot de passe */
+        .clickable-row { cursor: pointer; }
+        .clickable-row:active { background: #e5e5ea; }
+
+        /* ==========================================================================
+           Nouveau - 9. ÉCRAN SECRET ADMIN (ADMINISTRATION PANEL)
+           ========================================================================== */
+        #admin-screen { background: var(--ios-light-gray); color: #000000; }
+        #admin-screen .app-header { background: #fdfdfd; border-bottom: 1px solid var(--ios-border-gray); }
+
+        /* Style du Slider Button (iOS Toggle Switch) */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 51px;
+            height: 31px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #e5e5ea;
+            transition: .3s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 27px; width: 27px;
+            left: 2px; bottom: 2px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+        }
+        input:checked + .slider { background-color: var(--ios-green); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        .admin-text-label { font-size: 16px; font-weight: 500; color: #333; }
     </style>
 </head>
 <body>
@@ -547,6 +589,11 @@
                     <div class="app-name">Surf Tour</div>
                 </div>
 
+                <div class="app-icon-wrapper" onclick="navigateTo('home-screen', 'settings-app')">
+                    <div class="app-icon settings">⚙️</div>
+                    <div class="app-name">Réglages</div>
+                </div>
+
                 <div class="app-icon-wrapper" onclick="navigateTo('home-screen', 'surf-game-app'); initSurfGame();">
                     <div class="app-icon surf-game">🏄‍♂️</div>
                     <div class="app-name">Surf Rush</div>
@@ -587,6 +634,17 @@
                             <span class="chat-row-time">Hier</span>
                         </div>
                         <div class="chat-row-msg">Carrément ! Ce resto italien a de super avis en plus.</div>
+                    </div>
+                    <div class="chevron">›</div>
+                </div>
+                <div class="chat-row" id="row-marc" onclick="openDiscussion('marc')">
+                    <div class="avatar" style="background:#e8f5e9; color:#2e7d32;">M</div>
+                    <div class="chat-preview">
+                        <div class="chat-row-header">
+                            <span class="chat-row-name">Marc</span>
+                            <span class="chat-row-time">En ligne</span>
+                        </div>
+                        <div class="chat-row-msg">J'ai des nouvelles fraîches sur la cargaison du ML 203...</div>
                     </div>
                     <div class="chevron">›</div>
                 </div>
@@ -637,7 +695,6 @@
                 <img class="gallery-item" src="https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&fit=crop&w=300&q=80" alt="Épave" onclick="openLightbox(this.src)">
                 <img class="gallery-item" src="https://images.unsplash.com/photo-1590077428593-a55bb07c4665?auto=format&fit=crop&w=300&q=80" alt="Bunker" onclick="openLightbox(this.src)">
             </div>
-
             <div id="photo-lightbox" class="photo-lightbox">
                 <button class="lightbox-close" onclick="closeLightbox()">Fermer</button>
                 <img id="lightbox-img" class="lightbox-img" src="" alt="Plein écran">
@@ -647,21 +704,65 @@
         <div id="surf-wt-app" class="screen">
             <div class="app-header">
                 <button class="back-btn" onclick="navigateTo('surf-wt-app', 'home-screen')">‹ Accueil</button>
-                <div style="flex-grow:1; text-align:center; font-weight:bold; font-size:16px; margin-right:60px; color:white;">World Tour</div>
+                <div class="app-title">Surf Tour</div>
             </div>
-            <div class="wt-container">
-                <div class="invite-card">
-                    <span class="invite-badge">OFFICIEL</span>
-                    <h2 class="invite-title">LABENNE SURF OPEN</h2>
-                    <p class="invite-location">📍 Plage de Labenne Océan, Landes</p>
-                    
-                    <div class="invite-details">
-                        <strong>Événement :</strong> Compétition Élite Régionale<br>
-                        <strong>Date :</strong> Prochain week-end (Houle validée)<br>
-                        <strong>Catégorie :</strong> Shortboard Open
-                    </div>
+            <div class="invite-card-v1">
+                <div class="invite-content-v1">
+                    <h2 style="font-size:24px; margin-bottom:10px;">INVITATION OFFICIELLE</h2>
+                    <p style="font-size:18px;">Labenne Pro Surf Classic 2024</p>
+                    <p style="margin: 20px 0; color:#ccc;">Plage de Labenne Océan<br>15 - 18 Août</p>
+                    <button class="btn-accept-v1" onclick="alert('Inscription confirmée !')">ACCEPTER</button>
+                </div>
+            </div>
+        </div>
 
-                    <button class="btn-action" onclick="alert('Inscription enregistrée pour Labenne ! 🏄‍♂️')">Rejoindre le Contest</button>
+        <div id="settings-app" class="screen">
+            <div class="app-header">
+                <button class="back-btn" onclick="navigateTo('settings-app', 'home-screen')">‹ Accueil</button>
+                <div style="flex-grow:1; text-align:center; font-weight:bold; font-size:16px; margin-right:60px; color:black;">Réglages</div>
+            </div>
+            <div class="settings-container">
+                <div class="settings-group">
+                    <div class="settings-row">
+                        <div class="settings-left"><span class="settings-icon">✈️</span> Mode Avion</div>
+                        <div><label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-left"><span class="settings-icon">📶</span> Wi-Fi</div>
+                        <div class="settings-right">Airbus-Guest ›</div>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-left"><span class="settings-icon">🌐</span> Bluetooth</div>
+                        <div class="settings-right">Oui ›</div>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <div class="settings-row clickable-row" onclick="askAdminPassword()">
+                        <div class="settings-left"><span class="settings-icon">🔒</span> Mot de passe Admin</div>
+                        <div class="settings-right">Sécurisé ›</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="admin-screen" class="screen">
+            <div class="app-header">
+                <button class="back-btn" onclick="navigateTo('admin-screen', 'settings-app')">‹ Réglages</button>
+                <div style="flex-grow:1; text-align:center; font-weight:bold; font-size:16px; margin-right:60px; color:black;">Zone Admin</div>
+            </div>
+            <div class="settings-container">
+                <p style="padding: 0 16px 10px 16px; font-size:13px; color:#666; text-transform: uppercase;">Options du système</p>
+                <div class="settings-group">
+                    <div class="settings-row">
+                        <div class="settings-left">
+                            <label class="switch">
+                                <input type="checkbox" id="toggle-marc" onchange="toggleMarcDiscussion()">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="admin-text-label">Afficher message Marc</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -671,7 +772,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        /* --- DONNÉES SYSTÈME (Données d'origine préservées) --- */
+        /* --- DONNÉES SYSTÈME D'ORIGINE CONSERVÉES + MARC ADDED --- */
         const SYSTEM_DATA = {
             passcode: "1234",
             buffer: "",
@@ -691,6 +792,14 @@
                         { type: "received", text: "Coucou ! On se fait un resto ce soir ? J'ai super faim 🍕" },
                         { type: "sent", text: "Oh oui bonne idée ! Tu veux manger quoi ? Italien ou Japonais ?" },
                         { type: "received", text: "Carrément ! Ce resto italien a de super avis en plus." }
+                    ]
+                },
+                marc: {
+                    name: "Marc",
+                    messages: [
+                        { type: "received", text: "Salut. J'ai inspecté la zone près du bunker de Labenne. J'ai du nouveau concernant la cargaison cachée dans l'épave du ML 203." },
+                        { type: "sent", text: "Intéressant ! Tu as pu remonter du matériel ou des caisses ?" },
+                        { type: "received", text: "Pas encore, le courant est trop fort aujourd'hui. Mais à basse mer le week-end prochain, c'est jouable. Sois discret." }
                     ]
                 }
             }
@@ -748,7 +857,7 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        /* --- SURF RUSH GAME (Code d'origine intact) --- */
+        /* --- SURF RUSH GAME (Inaltéré) --- */
         let game = {
             y: 200, vel: 0, grav: 0.38, jump: -6.8, score: 0,
             active: false, gates: [], loop: null, spawnInterval: null,
@@ -837,7 +946,7 @@
                     if (game.y < g.topLimit || (game.y + 28) > g.bottomLimit) { gameOver(); return; }
                 }
 
-                if (g.x < -50) { g.element.remove(); game.gates.splice(i, 1); }
+                if (g.x < -50) { g.element.remove(); g.gates.splice(i, 1); }
             }
             game.loop = requestAnimationFrame(gameTick);
         }
@@ -848,7 +957,7 @@
             document.getElementById('menu-text').innerHTML = `Game Over 🦈<br>Score : ${game.score}`;
         }
 
-        /* --- MAPS INTERACTIVE (Code d'origine intact) --- */
+        /* --- MAPS INTERACTIVE (Inaltéré) --- */
         let mapInstance = null;
         function initMap() {
             if (mapInstance !== null) return; 
@@ -859,13 +968,40 @@
             L.marker([lat, lng], { icon: whaleIcon }).addTo(mapInstance).bindPopup("<b>Spot de Baleines</b>").openPopup();
         }
 
-        /* --- LOGIQUE DE LA NOUVELLE APP PHOTOS --- */
+        /* --- PHOTOS --- */
         function openLightbox(imageSrc) {
             document.getElementById('lightbox-img').src = imageSrc;
             document.getElementById('photo-lightbox').style.display = 'flex';
         }
         function closeLightbox() {
             document.getElementById('photo-lightbox').style.display = 'none';
+        }
+
+        /* ==========================================================================
+           LOGIQUE DE LA ZONE D'ADMINISTRATION SECRÈTE
+           ========================================================================== */
+        
+        // Demander le mot de passe admin via invite iOS Native
+        function askAdminPassword() {
+            const passwordAttempt = prompt("Entrez le mot de passe d'administration :");
+            
+            if (passwordAttempt === "admin") {
+                navigateTo('settings-app', 'admin-screen');
+            } else if (passwordAttempt !== null) {
+                alert("Mot de passe incorrect.");
+            }
+        }
+
+        // Gérer dynamiquement la présence de la conversation avec Marc
+        function toggleMarcDiscussion() {
+            const isChecked = document.getElementById('toggle-marc').checked;
+            const rowMarc = document.getElementById('row-marc');
+            
+            if (isChecked) {
+                rowMarc.style.display = 'flex'; // Devient visible dans Messages
+            } else {
+                rowMarc.style.display = 'none'; // Se masque à nouveau
+            }
         }
     </script>
 </body>
