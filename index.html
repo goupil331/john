@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>iPhone Simulator - Admin Update</title>
+    <title>iPhone Simulator - Cloud Live Edition</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
@@ -207,7 +207,7 @@
         .app-icon.maps { background: #ffffff; overflow: hidden; }
         .app-icon.photos { background: #ffffff; color: #ff3b30; } 
         .app-icon.surf-world-tour { background: #000000; color: #ffffff; font-weight: bold; border: 1px solid #333; font-size: 20px; }
-        .app-icon.settings { background: linear-gradient(#b3b3b3, #7a7a7a); color: white; font-size: 32px; } /* Roue crantée réglages */
+        .app-icon.settings { background: linear-gradient(#b3b3b3, #7a7a7a); color: white; font-size: 32px; } 
         
         .app-name {
             font-size: 11px;
@@ -238,7 +238,7 @@
         }
         .chat-row:active { background-color: var(--ios-light-gray); }
         
-        /* Masqué par défaut si l'admin ne l'active pas */
+        /* Géré en Live par la base de données Firebase */
         #row-marc { display: none; } 
 
         .avatar {
@@ -426,7 +426,7 @@
         }
 
         /* ==========================================================================
-           7. SURF WORLD TOUR APP (Retour Version 1 originelle comme demandé)
+           7. SURF WORLD TOUR APP (V1)
            ========================================================================== */
         #surf-wt-app { background: #000; color: #fff; text-align: center; }
         #surf-wt-app .app-header { background: #000; border-bottom: 1px solid #333; }
@@ -461,7 +461,7 @@
         }
 
         /* ==========================================================================
-           Nouveau - 8. APPLICATION RÉGLAGES (SETTINGS iOS)
+           8. RÉGLAGES APP ("Mot de passe")
            ========================================================================== */
         #settings-app { background: var(--ios-light-gray); color: #000000; }
         #settings-app .app-header { background: #ffffff; border-bottom: 1px solid var(--ios-border-gray); }
@@ -490,17 +490,15 @@
         .settings-icon { font-size: 20px; }
         .settings-right { color: #8e8e93; font-size: 15px; display: flex; align-items: center; gap: 6px; }
         
-        /* Bouton interactif cliquable pour le mot de passe */
         .clickable-row { cursor: pointer; }
         .clickable-row:active { background: #e5e5ea; }
 
         /* ==========================================================================
-           Nouveau - 9. ÉCRAN SECRET ADMIN (ADMINISTRATION PANEL)
+           9. ÉCRAN SECRET ADMIN 
            ========================================================================== */
         #admin-screen { background: var(--ios-light-gray); color: #000000; }
         #admin-screen .app-header { background: #fdfdfd; border-bottom: 1px solid var(--ios-border-gray); }
 
-        /* Style du Slider Button (iOS Toggle Switch) */
         .switch {
             position: relative;
             display: inline-block;
@@ -729,7 +727,7 @@
                     </div>
                     <div class="settings-row">
                         <div class="settings-left"><span class="settings-icon">📶</span> Wi-Fi</div>
-                        <div class="settings-right">Airbus-Guest ›</div>
+                        <div class="settings-right">Connecté ›</div>
                     </div>
                     <div class="settings-row">
                         <div class="settings-left"><span class="settings-icon">🌐</span> Bluetooth</div>
@@ -739,7 +737,7 @@
 
                 <div class="settings-group">
                     <div class="settings-row clickable-row" onclick="askAdminPassword()">
-                        <div class="settings-left"><span class="settings-icon">🔒</span> Mot de passe Admin</div>
+                        <div class="settings-left"><span class="settings-icon">🔒</span> Mot de passe</div>
                         <div class="settings-right">Sécurisé ›</div>
                     </div>
                 </div>
@@ -757,7 +755,7 @@
                     <div class="settings-row">
                         <div class="settings-left">
                             <label class="switch">
-                                <input type="checkbox" id="toggle-marc" onchange="toggleMarcDiscussion()">
+                                <input type="checkbox" id="toggle-marc" onchange="handleMarcToggleLiveChange()">
                                 <span class="slider"></span>
                             </label>
                         </div>
@@ -771,8 +769,27 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
     <script>
-        /* --- DONNÉES SYSTÈME D'ORIGINE CONSERVÉES + MARC ADDED --- */
+        /* --- CLÉS DE CONFIGURATION DÉPLOYÉES --- */
+        const firebaseConfig = {
+            apiKey: "AIzaSyDZrCK1pb6sP4Q36TMnUt0Rypgm_cXFoMY",
+            authDomain: "iphone-simulation.firebaseapp.com",
+            projectId: "iphone-simulation",
+            storageBucket: "iphone-simulation.firebasestorage.app",
+            messagingSenderId: "729300742862",
+            appId: "1:729300742862:web:b140de5aaa6951c087169f",
+            // Reconstruction de l'adresse de ta base européenne en temps réel
+            databaseURL: "https://iphone-simulation-default-rtdb.europe-west1.firebasedatabase.app"
+        };
+
+        // Initialisation globale de Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        /* --- DONNÉES SIMULATEUR DE BASE --- */
         const SYSTEM_DATA = {
             passcode: "1234",
             buffer: "",
@@ -818,7 +835,7 @@
         }
         setInterval(runClock, 1000); runClock();
 
-        /* --- SÉCURITÉ CODE ACCÈS --- */
+        /* --- PAVÉ NUMÉRIQUE DE DÉVERROUILLAGE --- */
         function handleKeypress(digit) {
             if (SYSTEM_DATA.buffer.length < 4) {
                 SYSTEM_DATA.buffer += digit;
@@ -840,7 +857,7 @@
             }
         }
 
-        /* --- MESSAGES --- */
+        /* --- APPLICATION MESSAGES --- */
         function openDiscussion(key) {
             const data = SYSTEM_DATA.discussions[key];
             document.getElementById('active-contact-name').textContent = data.name;
@@ -857,7 +874,7 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        /* --- SURF RUSH GAME (Inaltéré) --- */
+        /* --- SURF RUSH GAME --- */
         let game = {
             y: 200, vel: 0, grav: 0.38, jump: -6.8, score: 0,
             active: false, gates: [], loop: null, spawnInterval: null,
@@ -957,7 +974,7 @@
             document.getElementById('menu-text').innerHTML = `Game Over 🦈<br>Score : ${game.score}`;
         }
 
-        /* --- MAPS INTERACTIVE (Inaltéré) --- */
+        /* --- MAPS INTERACTIVE --- */
         let mapInstance = null;
         function initMap() {
             if (mapInstance !== null) return; 
@@ -968,7 +985,7 @@
             L.marker([lat, lng], { icon: whaleIcon }).addTo(mapInstance).bindPopup("<b>Spot de Baleines</b>").openPopup();
         }
 
-        /* --- PHOTOS --- */
+        /* --- GALLERY PHOTOS --- */
         function openLightbox(imageSrc) {
             document.getElementById('lightbox-img').src = imageSrc;
             document.getElementById('photo-lightbox').style.display = 'flex';
@@ -977,14 +994,9 @@
             document.getElementById('photo-lightbox').style.display = 'none';
         }
 
-        /* ==========================================================================
-           LOGIQUE DE LA ZONE D'ADMINISTRATION SECRÈTE
-           ========================================================================== */
-        
-        // Demander le mot de passe admin via invite iOS Native
+        /* --- SÉCURITÉ ADMIN --- */
         function askAdminPassword() {
-            const passwordAttempt = prompt("Entrez le mot de passe d'administration :");
-            
+            const passwordAttempt = prompt("Entrez le mot de passe :");
             if (passwordAttempt === "admin") {
                 navigateTo('settings-app', 'admin-screen');
             } else if (passwordAttempt !== null) {
@@ -992,16 +1004,36 @@
             }
         }
 
-        // Gérer dynamiquement la présence de la conversation avec Marc
-        function toggleMarcDiscussion() {
-            const isChecked = document.getElementById('toggle-marc').checked;
-            const rowMarc = document.getElementById('row-marc');
+        /* ==========================================================================
+           LOGIQUE CLOUD LIVE REALTME (Synchronisation instantanée globale)
+           ========================================================================== */
+
+        // 1. ÉCOUTE EN DIRECT : S'exécute automatiquement dès que la valeur change sur Firebase
+        database.ref('showMarcMessage').on('value', (snapshot) => {
+            const isVisible = snapshot.val(); // Récupère la valeur (true ou false) depuis Internet
             
-            if (isChecked) {
-                rowMarc.style.display = 'flex'; // Devient visible dans Messages
+            const rowMarc = document.getElementById('row-marc');
+            const toggleSwitch = document.getElementById('toggle-marc');
+            
+            if (isVisible === true) {
+                rowMarc.style.display = 'flex';
+                toggleSwitch.checked = true;
             } else {
-                rowMarc.style.display = 'none'; // Se masque à nouveau
+                rowMarc.style.display = 'none';
+                toggleSwitch.checked = false;
             }
+        });
+
+        // 2. ÉCRITURE EN DIRECT : Exécutée lorsque TU modifies l'état du switch admin
+        function handleMarcToggleLiveChange() {
+            const isChecked = document.getElementById('toggle-marc').checked;
+            
+            // Envoie la valeur à Firebase. Les 10 téléphones connectés vont réagir instantanément.
+            database.ref('/').update({
+                showMarcMessage: isChecked
+            }).catch(err => {
+                console.error("Erreur d'écriture Firebase Cloud :", err);
+            });
         }
     </script>
 </body>
