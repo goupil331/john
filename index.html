@@ -3,45 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>iPhone Simulator - Fixed Edition</title>
+    <title>iPhone Simulator - Pro v3</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
     <style>
-        /* ==========================================================================
-           VARIABLES & CONFIGURATION DE BASE
-           ========================================================================== */
         :root {
             --ios-blue: #007aff;
-            --ios-green: #34c759;
             --ios-light-gray: #f2f2f7;
             --ios-border-gray: #e5e5ea;
             --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: var(--font-stack);
-            user-select: none;
-            -webkit-user-select: none;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-stack); user-select: none; -webkit-user-select: none; }
 
-        body {
-            background-color: #1a1a1a;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 10px;
-        }
+        body { background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 10px; overflow: hidden; }
 
-        /* ==========================================================================
-           CONTENEUR IPHONE (Hauteur réduite fixe pour éviter le scroll)
-           ========================================================================== */
+        /* IPHONE CONTAINER - TAILLE RÉDUITE (680px) */
         .iphone-container {
             width: 375px;
-            height: 680px; /* Réduit pour s'adapter à Safari mobile */
+            height: 680px;
             background: url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809') center/cover;
             border-radius: 40px;
             position: relative;
@@ -52,702 +31,277 @@
             flex-direction: column;
         }
 
-        /* Île dynamique */
-        .dynamic-island {
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 110px;
-            height: 25px;
-            background: black;
-            border-radius: 20px;
-            z-index: 100;
-            pointer-events: none;
-        }
+        .dynamic-island { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 110px; height: 25px; background: black; border-radius: 20px; z-index: 100; }
 
-        /* Moteur d'écrans */
-        .screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: none;
-            flex-direction: column;
-        }
+        /* SYSTÈME D'ÉCRANS */
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; }
+        .screen.active { display: flex; }
 
-        .screen.active {
-            display: flex;
-        }
+        /* UI GÉNÉRIQUE */
+        .app-header { padding: 40px 16px 12px 16px; display: flex; align-items: center; z-index: 10; background: var(--ios-light-gray); border-bottom: 1px solid var(--ios-border-gray); }
+        .back-btn { background: none; border: none; color: var(--ios-blue); font-size: 16px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+        .app-title { flex-grow: 1; text-align: center; font-weight: bold; font-size: 17px; margin-right: 60px; color: #000; }
 
-        /* Headers génériques */
-        .app-header {
-            padding: 40px 16px 12px 16px;
-            display: flex;
-            align-items: center;
-            z-index: 10;
-        }
-
-        .back-btn {
-            background: none;
-            border: none;
-            color: var(--ios-blue);
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        /* ==========================================================================
-           1. LOCK SCREEN
-           ========================================================================== */
-        #lock-screen {
-            align-items: center;
-            justify-content: space-between;
-            padding: 50px 20px 25px 20px;
-            background: rgba(0, 0, 0, 0.15);
-            color: white;
-        }
-
+        /* 1. LOCK & PASSCODE */
+        #lock-screen { align-items: center; justify-content: space-between; padding: 50px 20px 25px 20px; background: rgba(0,0,0,0.2); color: white; }
         .time { font-size: 58px; font-weight: 200; }
-        .date { font-size: 16px; font-weight: 500; margin-top: -6px; }
-
-        .swipe-up-zone {
-            width: 100%;
-            text-align: center;
-            cursor: pointer;
-            animation: bounce 2s infinite;
-            padding-bottom: 5px;
-        }
-        .swipe-bar {
-            width: 130px;
-            height: 5px;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 3px;
-            margin: 8px auto 0 auto;
-        }
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-8px); }
-            60% { transform: translateY(-4px); }
-        }
-
-        /* ==========================================================================
-           2. PASSCODE SCREEN
-           ========================================================================== */
-        #passcode-screen {
-            background: rgba(0, 0, 0, 0.55);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            justify-content: center;
-            align-items: center;
-            color: white;
-        }
-
-        .passcode-title { font-size: 16px; margin-bottom: 20px; }
-        .dots-container { display: flex; gap: 20px; margin-bottom: 30px; }
-        .dot {
-            width: 12px;
-            height: 12px;
-            border: 1.5px solid white;
-            border-radius: 50%;
-        }
+        .swipe-bar { width: 130px; height: 5px; background: rgba(255,255,255,0.8); border-radius: 3px; margin: 8px auto; }
+        
+        #passcode-screen { background: rgba(0,0,0,0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); justify-content: center; align-items: center; color: white; }
+        .dots { display: flex; gap: 15px; margin: 20px 0 40px; }
+        .dot { width: 12px; height: 12px; border: 1px solid white; border-radius: 50%; }
         .dot.filled { background: white; }
+        .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .key { width: 65px; height: 65px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; }
 
-        .keypad {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 14px;
-        }
-        .key {
-            width: 68px;
-            height: 68px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.12);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            cursor: pointer;
-        }
-        .key:active { background: rgba(255, 255, 255, 0.3); }
-        .error-message {
-            color: #ff3b30;
-            margin-top: 10px;
-            font-size: 13px;
-            height: 20px;
-            visibility: hidden;
-        }
+        /* 2. HOME SCREEN */
+        #home-screen { padding: 50px 20px; }
+        .apps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .app-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .icon { width: 58px; height: 58px; border-radius: 14px; margin-bottom: 5px; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .app-name { font-size: 11px; color: white; text-shadow: 0 1px 2px #000; }
 
-        /* ==========================================================================
-           3. HOME SCREEN
-           ========================================================================== */
-        #home-screen {
-            padding: 50px 24px;
-            color: white;
-        }
-        .apps-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-        }
-        .app-icon-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-        }
-        .app-icon {
-            width: 58px;
-            height: 58px;
-            border-radius: 13px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-            margin-bottom: 5px;
-            font-size: 28px;
-        }
-        .app-icon.messages { background: linear-gradient(#34c759, #248a3d); }
-        .app-icon.surf-game { background: linear-gradient(#2fbdff, #0051a8); }
-        .app-icon.maps { background: #ffffff; overflow: hidden; }
-        .app-name {
-            font-size: 11px;
-            text-align: center;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-        }
+        /* APPS COLORS */
+        .bg-messages { background: linear-gradient(#34c759, #248a3d); }
+        .bg-surf { background: linear-gradient(#2fbdff, #0051a8); }
+        .bg-photos { background: #fff; color: #ff3b30; }
+        .bg-world { background: #000; color: #fff; font-size: 20px; font-weight: bold; border: 1px solid #333; }
+        .bg-maps { background: #fff; overflow: hidden; }
 
-        /* ==========================================================================
-           4. MESSAGES APP (Thème Clair iOS corrigé)
-           ========================================================================== */
-        #messages-app { background: #ffffff; color: #000000; }
-        
-        #messages-app .app-header {
-            background: var(--ios-light-gray);
-            border-bottom: 1px solid var(--ios-border-gray);
-        }
+        /* 3. MESSAGES (THÈME CLAIR) */
+        #messages-app, #chat-view { background: #fff; }
+        .chat-row { display: flex; padding: 12px 16px; border-bottom: 1px solid var(--ios-border-gray); align-items: center; color: #000; }
+        .avatar { width: 45px; height: 45px; border-radius: 50%; background: #e5e5ea; margin-right: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #8e8e93; }
+        .msg-prev { flex-grow: 1; font-size: 14px; color: #8e8e93; }
+        .bubble { max-width: 75%; padding: 8px 14px; border-radius: 18px; font-size: 15px; margin: 5px 0; }
+        .received { background: var(--ios-light-gray); align-self: flex-start; color: #000; }
+        .sent { background: var(--ios-blue); align-self: flex-end; color: #fff; }
 
-        .chat-list {
-            flex-grow: 1;
-            overflow-y: auto;
-            background: #ffffff;
-        }
-        .chat-row {
-            display: flex;
-            align-items: center;
-            padding: 14px 16px;
-            border-bottom: 0.5px solid var(--ios-border-gray);
-            cursor: pointer;
-        }
-        .chat-row:active { background-color: var(--ios-light-gray); }
-        .avatar {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background: #e5e5ea;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 16px;
-            margin-right: 14px;
-            color: #8e8e93;
-        }
-        .chat-preview { flex-grow: 1; }
-        .chat-row-header { display: flex; justify-content: space-between; margin-bottom: 3px; }
-        .chat-row-name { font-weight: 600; font-size: 16px; color: #000000; }
-        .chat-row-time { font-size: 14px; color: #8e8e93; }
-        .chat-row-msg { font-size: 14px; color: #8e8e93; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
-        .chevron { color: #c7c7cc; font-size: 16px; }
+        /* 4. PHOTOS APP */
+        #photos-app { background: #000; }
+        .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 2px; }
+        .gallery-img { width: 100%; aspect-ratio: 1; object-fit: cover; cursor: pointer; }
+        .full-photo { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 100; display: none; align-items: center; justify-content: center; }
+        .full-photo img { width: 100%; max-height: 80%; object-fit: contain; }
 
-        /* Vue conversation active */
-        #chat-detail-view { background: #ffffff; color: #000000; z-index: 15; }
-        #chat-detail-view .app-header {
-            background: var(--ios-light-gray);
-            border-bottom: 1px solid var(--ios-border-gray);
-        }
-        .chat-body {
-            flex-grow: 1;
-            padding: 16px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            background: #ffffff;
-        }
-        .message-bubble {
-            max-width: 75%;
-            padding: 8px 14px;
-            border-radius: 18px;
-            font-size: 15px;
-            line-height: 1.4;
-        }
-        .message-bubble.received { background: var(--ios-light-gray); color: #000000; align-self: flex-start; }
-        .message-bubble.sent { background: var(--ios-blue); color: #ffffff; align-self: flex-end; }
-        
-        .chat-input-area {
-            padding: 10px 16px 20px 16px;
-            border-top: 1px solid var(--ios-border-gray);
-            display: flex;
-            background: var(--ios-light-gray);
-        }
-        .chat-input {
-            background: #ffffff;
-            border: 1px solid var(--ios-border-gray);
-            border-radius: 20px;
-            padding: 8px 14px;
-            color: black;
-            flex-grow: 1;
-            outline: none;
-            font-size: 15px;
-        }
+        /* 5. SURF WORLD TOUR */
+        #world-tour-app { background: #000; color: #fff; text-align: center; }
+        .invite-card { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; padding: 30px; background: url('https://images.unsplash.com/photo-1502680390469-be75c86b636f?auto=format&fit=crop&w=400&q=80') center/cover; position: relative; }
+        .invite-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); }
+        .invite-content { position: relative; z-index: 1; }
+        .btn-accept { background: var(--ios-blue); color: white; border: none; padding: 15px 40px; border-radius: 30px; font-weight: bold; margin-top: 20px; cursor: pointer; }
 
-        /* ==========================================================================
-           5. SURF RUSH GAME ( Difficulté progressive sans bug )
-           ========================================================================== */
-        #surf-game-app { background: #0051a8; color: white; }
-        .game-container {
-            flex-grow: 1;
-            position: relative;
-            overflow: hidden;
-            background: linear-gradient(#7cd2ff, #0072ff);
-            cursor: pointer;
-        }
-        #surfer {
-            position: absolute;
-            left: 45px;
-            top: 200px;
-            font-size: 32px;
-            width: 36px;
-            height: 36px;
-            z-index: 5;
-        }
-        .shark-gate {
-            position: absolute;
-            width: 50px;
-            height: 100%;
-        }
-        .shark-obstacle {
-            position: absolute;
-            font-size: 32px;
-            width: 100%;
-            text-align: center;
-        }
-        .score-display {
-            position: absolute;
-            top: 30px;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            font-size: 36px;
-            font-weight: bold;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            z-index: 10;
-        }
-        .game-menu {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 20;
-        }
-        .game-menu p { font-size: 15px; margin-bottom: 16px; text-align: center; padding: 0 24px;}
-        .game-btn {
-            background: #ff9500;
-            border: none;
-            color: white;
-            padding: 10px 24px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 20px;
-        }
+        /* 6. SURF RUSH */
+        .game-area { flex-grow: 1; background: linear-gradient(#7cd2ff, #0072ff); position: relative; overflow: hidden; cursor: pointer; }
+        #surfer { position: absolute; left: 40px; top: 200px; font-size: 30px; z-index: 10; }
+        .gate { position: absolute; width: 50px; height: 100%; }
+        .shark { position: absolute; font-size: 30px; width: 100%; text-align: center; }
+        .score { position: absolute; top: 30px; width: 100%; text-align: center; font-size: 32px; font-weight: bold; color: white; }
 
-        /* ==========================================================================
-           6. MAPS APP (Vraie carte avec Leaflet.js)
-           ========================================================================== */
-        #maps-app { background: #ffffff; }
-        #map {
-            width: 100%;
-            flex-grow: 1; /* Remplit tout l'écran restant du téléphone */
-            z-index: 1;
-        }
-        /* Style personnalisé pour l'émoji Baleine dans Leaflet */
-        .whale-marker {
-            font-size: 30px;
-            text-align: center;
-            line-height: 1;
-        }
+        /* 7. MAPS */
+        #map { width: 100%; flex-grow: 1; }
     </style>
 </head>
 <body>
 
-    <div class="iphone-container">
-        <div class="dynamic-island"></div>
+<div class="iphone-container">
+    <div class="dynamic-island"></div>
 
-        <div id="lock-screen" class="screen active">
-            <div style="text-align: center; width: 100%;">
-                <div class="lock-icon">🔒</div>
-                <div class="time" id="current-time">09:41</div>
-                <div class="date" id="current-date">Mardi 19 Mai</div>
-            </div>
-            <div class="swipe-up-zone" onclick="navigateTo('lock-screen', 'passcode-screen')">
-                <p style="font-size: 13px; font-weight: 500;">Balayer vers le haut pour déverrouiller</p>
-                <div class="swipe-bar"></div>
-            </div>
+    <div id="lock-screen" class="screen active">
+        <div style="text-align: center;">
+            <div style="font-size: 20px;">🔒</div>
+            <div class="time" id="clock">09:41</div>
+            <div id="date">Mardi 19 Mai</div>
         </div>
-
-        <div id="passcode-screen" class="screen">
-            <div class="passcode-title">Saisissez le code</div>
-            <div class="dots-container">
-                <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-            </div>
-            <div class="keypad">
-                <div class="key" onclick="handleKeypress('1')">1</div>
-                <div class="key" onclick="handleKeypress('2')">2</div>
-                <div class="key" onclick="handleKeypress('3')">3</div>
-                <div class="key" onclick="handleKeypress('4')">4</div>
-                <div class="key" onclick="handleKeypress('5')">5</div>
-                <div class="key" onclick="handleKeypress('6')">6</div>
-                <div class="key" onclick="handleKeypress('7')">7</div>
-                <div class="key" onclick="handleKeypress('8')">8</div>
-                <div class="key" onclick="handleKeypress('9')">9</div>
-                <div></div>
-                <div class="key" onclick="handleKeypress('0')">0</div>
-            </div>
-            <div class="error-message" id="error-msg">Code incorrect. Réessayez.</div>
+        <div class="swipe-up-zone" onclick="nav('lock-screen', 'passcode-screen')">
+            <p style="font-size: 13px;">Balayer pour déverrouiller</p>
+            <div class="swipe-bar"></div>
         </div>
-
-        <div id="home-screen" class="screen">
-            <div class="apps-grid">
-                <div class="app-icon-wrapper" onclick="navigateTo('home-screen', 'messages-app')">
-                    <div class="app-icon messages">
-                        <svg viewBox="0 0 24 24" style="width:32px; height:32px; fill:white;"><path d="M12 2C6.48 2 2 6.02 2 11c0 2.9 1.57 5.47 4 7.05V22l4.1-2.45c.61.16 1.25.25 1.9.25 5.48 0 10-4.02 10-9s-4.52-9-10-9z"/></svg>
-                    </div>
-                    <div class="app-name">Messages</div>
-                </div>
-                <div class="app-icon-wrapper" onclick="navigateTo('home-screen', 'surf-game-app'); initSurfGame();">
-                    <div class="app-icon surf-game">🏄‍♂️</div>
-                    <div class="app-name">Surf Rush</div>
-                </div>
-                <div class="app-icon-wrapper" onclick="navigateTo('home-screen', 'maps-app'); initMap();">
-                    <div class="app-icon maps">
-                        <svg viewBox="0 0 64 64" style="width:100%; height:100%;"><path d="M0 0h64v64H0z" fill="#E3F2FD"/><path d="M20 0l24 12 20-8v52L44 64 20 52 0 60V8l20-8z" fill="#fff" opacity=".5"/><path d="M20 0v52l24 12V12L20 0z" fill="#CCC" opacity=".3"/><path d="M44 12L20 0 0 8v52l20-8 24 12 20-8V4l-20 8z" stroke="#1565C0" stroke-width="2" fill="none"/><path d="M32 16l6 16-16-6 10-10z" fill="#FF5252"/></svg>
-                    </div>
-                    <div class="app-name">Plans</div>
-                </div>
-            </div>
-        </div>
-
-        <div id="messages-app" class="screen">
-            <div class="app-header">
-                <button class="back-btn" onclick="navigateTo('messages-app', 'home-screen')">‹ Accueil</button>
-                <div style="flex-grow:1; text-align:center; font-weight:bold; font-size:17px; margin-right:60px;">Messages</div>
-            </div>
-            
-            <div class="chat-list">
-                <div class="chat-row" onclick="openDiscussion('francois')">
-                    <div class="avatar">F</div>
-                    <div class="chat-preview">
-                        <div class="chat-row-header">
-                            <span class="chat-row-name">François</span>
-                            <span class="chat-row-time">09:40</span>
-                        </div>
-                        <div class="chat-row-msg">Vers 7h30 pour éviter le monde ? Le vent sera offshore...</div>
-                    </div>
-                    <div class="chevron">›</div>
-                </div>
-                <div class="chat-row" onclick="openDiscussion('marion')">
-                    <div class="avatar" style="background:#f3e5f5; color:#9c27b0;">M</div>
-                    <div class="chat-preview">
-                        <div class="chat-row-header">
-                            <span class="chat-row-name">Marion</span>
-                            <span class="chat-row-time">Hier</span>
-                        </div>
-                        <div class="chat-row-msg">Carrément ! Ce resto italien a de super avis en plus.</div>
-                    </div>
-                    <div class="chevron">›</div>
-                </div>
-            </div>
-        </div>
-
-        <div id="chat-detail-view" class="screen">
-            <div class="app-header">
-                <button class="back-btn" onclick="navigateTo('chat-detail-view', 'messages-app')">‹ Retour</button>
-                <div style="flex-grow:1; text-align:center; font-weight:bold; font-size:16px; margin-right:60px;" id="active-contact-name">Contact</div>
-            </div>
-            <div class="chat-body" id="chat-messages-container"></div>
-            <div class="chat-input-area">
-                <input type="text" class="chat-input" placeholder="iMessage" disabled>
-            </div>
-        </div>
-
-        <div id="surf-game-app" class="screen">
-            <div class="app-header" style="background: #7cd2ff; border: none; padding-top:35px;">
-                <button class="back-btn" onclick="navigateTo('surf-game-app', 'home-screen'); stopSurfGame();" style="color: #004494;">‹ Quitter</button>
-            </div>
-            <div class="game-container" id="game-area" onclick="triggerSurferJump()">
-                <div class="score-display" id="game-score">0</div>
-                <div id="surfer">🏄‍♂️</div>
-                
-                <div class="game-menu" id="game-menu">
-                    <p id="menu-text">Passe au milieu des requins !<br>Difficulté progressive.</p>
-                    <button class="game-btn" onclick="startSurfGame(event)">Surfer</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="maps-app" class="screen">
-            <div class="app-header" style="background: #f4f3f0; border-bottom: 1px solid var(--ios-border-gray); padding-top:35px;">
-                <button class="back-btn" onclick="navigateTo('maps-app', 'home-screen')">‹ Quitter</button>
-                <div style="flex-grow:1; text-align:center; font-weight:bold; font-size:16px; margin-right:60px;">📍 Plans</div>
-            </div>
-            <div id="map"></div>
-        </div>
-
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <div id="passcode-screen" class="screen">
+        <p style="margin-top: 100px;">Saisissez le code</p>
+        <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        <div class="keypad">
+            <div class="key" onclick="k('1')">1</div><div class="key" onclick="k('2')">2</div><div class="key" onclick="k('3')">3</div>
+            <div class="key" onclick="k('4')">4</div><div class="key" onclick="k('5')">5</div><div class="key" onclick="k('6')">6</div>
+            <div class="key" onclick="k('7')">7</div><div class="key" onclick="k('8')">8</div><div class="key" onclick="k('9')">9</div>
+            <div></div><div class="key" onclick="k('0')">0</div>
+        </div>
+    </div>
 
-    <script>
-        /* --- DONNÉES SYSTÈME --- */
-        const SYSTEM_DATA = {
-            passcode: "1234",
-            buffer: "",
-            discussions: {
-                francois: {
-                    name: "François",
-                    messages: [
-                        { type: "received", text: "Salut ! Tu as vu les prévisions pour ce week-end ? Y'a une super houle qui rentre." },
-                        { type: "sent", text: "Carrément ! J'ai vu ça. Les conditions ont l'air parfaites pour une session surf samedi matin." },
-                        { type: "received", text: "Grave ! On se capte à quelle heure au spot ? J'embarque ma 6'2." },
-                        { type: "sent", text: "Vers 7h30 pour éviter le monde ? Le vent sera offshore en plus 🏄‍♂️" }
-                    ]
-                },
-                marion: {
-                    name: "Marion",
-                    messages: [
-                        { type: "received", text: "Coucou ! On se fait un resto ce soir ? J'ai super faim 🍕" },
-                        { type: "sent", text: "Oh oui bonne idée ! Tu veux manger quoi ? Italien ou Japonais ?" },
-                        { type: "received", text: "Carrément ! Ce resto italien a de super avis en plus." }
-                    ]
-                }
+    <div id="home-screen" class="screen">
+        <div class="apps-grid">
+            <div class="app-item" onclick="nav('home-screen', 'messages-app')">
+                <div class="icon bg-messages">💬</div><div class="app-name">Messages</div>
+            </div>
+            <div class="app-item" onclick="nav('home-screen', 'photos-app')">
+                <div class="icon bg-photos">🖼️</div><div class="app-name">Photos</div>
+            </div>
+            <div class="app-item" onclick="nav('home-screen', 'world-tour-app')">
+                <div class="icon bg-world">SWT</div><div class="app-name">World Tour</div>
+            </div>
+            <div class="app-item" onclick="nav('home-screen', 'surf-game-app'); initG();">
+                <div class="icon bg-surf">🏄</div><div class="app-name">Surf Rush</div>
+            </div>
+            <div class="app-item" onclick="nav('home-screen', 'maps-app'); initM();">
+                <div class="icon bg-maps"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Apple_Maps_logo.svg/1200px-Apple_Maps_logo.svg.png" width="100%"></div><div class="app-name">Plans</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="messages-app" class="screen">
+        <div class="app-header">
+            <button class="back-btn" onclick="nav('messages-app', 'home-screen')">‹ Accueil</button>
+            <div class="app-title">Messages</div>
+        </div>
+        <div class="chat-list">
+            <div class="chat-row" onclick="openC('francois')"><div class="avatar">F</div><div class="msg-prev"><b>François</b><br>Vers 7h30 pour éviter le monde ?</div></div>
+            <div class="chat-row" onclick="openC('marion')"><div class="avatar" style="color:#af52de">M</div><div class="msg-prev"><b>Marion</b><br>Carrément ! Ce resto italien a...</div></div>
+        </div>
+    </div>
+
+    <div id="chat-view" class="screen">
+        <div class="app-header">
+            <button class="back-btn" onclick="nav('chat-view', 'messages-app')">‹ Retour</button>
+            <div class="app-title" id="chat-name">Nom</div>
+        </div>
+        <div id="chat-body" style="flex-grow:1; display:flex; flex-direction:column; padding:15px; overflow-y:auto;"></div>
+        <div style="background:#f2f2f7; padding:10px 15px 30px;"><div style="background:#fff; border:1px solid #ddd; border-radius:20px; padding:8px 15px; color:#ccc;">iMessage</div></div>
+    </div>
+
+    <div id="photos-app" class="screen">
+        <div class="app-header" style="background:#fff;">
+            <button class="back-btn" onclick="nav('photos-app', 'home-screen')">‹ Accueil</button>
+            <div class="app-title">Photothèque</div>
+        </div>
+        <div class="gallery-grid">
+            <img class="gallery-img" src="https://images.unsplash.com/photo-1502680390469-be75c86b636f?auto=format&fit=crop&w=400&q=80" onclick="showP(this.src)">
+            <img class="gallery-img" src="https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&fit=crop&w=400&q=80" onclick="showP(this.src)">
+            <img class="gallery-img" src="https://images.unsplash.com/photo-1590077428593-a55bb07c4665?auto=format&fit=crop&w=400&q=80" onclick="showP(this.src)">
+        </div>
+        <div id="full-view" class="full-photo" onclick="this.style.display='none'"><img id="full-img"></div>
+    </div>
+
+    <div id="world-tour-app" class="screen">
+        <div class="app-header" style="background:#000; border-bottom:1px solid #333;">
+            <button class="back-btn" onclick="nav('world-tour-app', 'home-screen')">‹ Accueil</button>
+            <div class="app-title" style="color:#fff;">Surf Tour</div>
+        </div>
+        <div class="invite-card">
+            <div class="invite-content">
+                <h2 style="font-size:24px; margin-bottom:10px;">INVITATION OFFICIELLE</h2>
+                <p style="font-size:18px;">Labenne Pro Surf Classic 2024</p>
+                <p style="margin: 20px 0; color:#ccc;">Plage de Labenne Océan<br>15 - 18 Août</p>
+                <button class="btn-accept" onclick="alert('Inscription confirmée !')">ACCEPTER</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="surf-game-app" class="screen">
+        <div class="app-header" style="background:#7cd2ff; border:none; padding-top:35px;">
+            <button class="back-btn" onclick="nav('surf-game-app', 'home-screen'); stopG();" style="color: #004494;">‹ Quitter</button>
+        </div>
+        <div class="game-area" id="g-area" onclick="jmp()">
+            <div class="score" id="g-score">0</div>
+            <div id="surfer">🏄‍♂️</div>
+            <div id="g-menu" class="game-menu" style="display:flex;">
+                <p style="color:white; margin-bottom:15px; text-align:center;">Passe au milieu des requins !</p>
+                <button class="game-btn" onclick="startG(event)">Surfer</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="maps-app" class="screen">
+        <div class="app-header" style="background:#f4f3f0; padding-top:35px;">
+            <button class="back-btn" onclick="nav('maps-app', 'home-screen')">‹ Quitter</button>
+            <div class="app-title">Plans</div>
+        </div>
+        <div id="map"></div>
+    </div>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    const data = {
+        pin: "1234", buf: "",
+        chats: {
+            francois: { name: "François", msgs: [{t:"r", m:"Salut ! Tu as vu les prévisions ?"},{t:"s", m:"Carrément ! Session samedi matin ?"},{t:"r", m:"Grave ! On se capte à quelle heure ?"},{t:"s", m:"Vers 7h30 pour éviter le monde ?"}]},
+            marion: { name: "Marion", msgs: [{t:"r", m:"Coucou ! On se fait un resto ?"},{t:"s", m:"Bonne idée ! Italien ou Jap ?"},{t:"r", m:"Italien ! Il a de super avis."}]}
+        }
+    };
+
+    function nav(c, n) { document.getElementById(c).classList.remove('active'); document.getElementById(n).classList.add('active'); }
+    
+    function k(digit) {
+        if (data.buf.length < 4) {
+            data.buf += digit;
+            document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('filled', i < data.buf.length));
+            if (data.buf.length === 4) {
+                setTimeout(() => {
+                    if (data.buf === data.pin) nav('passcode-screen', 'home-screen');
+                    else { data.buf = ""; document.querySelectorAll('.dot').forEach(d => d.classList.remove('filled')); }
+                }, 300);
             }
-        };
-
-        /* --- MOTEUR NAVIGATION & HORLOGE --- */
-        function navigateTo(curr, next) {
-            document.getElementById(curr).classList.remove('active');
-            document.getElementById(next).classList.add('active');
         }
+    }
 
-        function runClock() {
-            const now = new Date();
-            document.getElementById('current-time').textContent = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    function openC(key) {
+        const c = data.chats[key];
+        document.getElementById('chat-name').textContent = c.name;
+        const b = document.getElementById('chat-body'); b.innerHTML = "";
+        c.msgs.forEach(m => {
+            const div = document.createElement('div');
+            div.className = `bubble ${m.t === 'r' ? 'received' : 'sent'}`;
+            div.textContent = m.m;
+            b.appendChild(div);
+        });
+        nav('messages-app', 'chat-view'); b.scrollTop = b.scrollHeight;
+    }
+
+    function showP(src) { document.getElementById('full-img').src = src; document.getElementById('full-view').style.display = 'flex'; }
+
+    // GAME LOGIC
+    let g = { y: 200, v: 0, s: 0, on: false, gs: [], gap: 140, min: 95 };
+    function initG() { stopG(); g.y = 200; g.v = 0; g.s = 0; g.gap = 140; document.getElementById('surfer').style.top = '200px'; document.getElementById('g-score').textContent = "0"; document.getElementById('g-menu').style.display = 'flex'; document.querySelectorAll('.gate').forEach(e => e.remove()); g.gs = []; }
+    function startG(e) { e.stopPropagation(); document.getElementById('g-menu').style.display = 'none'; g.on = true; g.loop = requestAnimationFrame(tick); g.spw = setInterval(spw, 2000); }
+    function stopG() { g.on = false; cancelAnimationFrame(g.loop); clearInterval(g.spw); }
+    function jmp() { if (g.on) g.v = -6.5; }
+    function spw() {
+        if (!g.on) return;
+        const op = Math.floor(Math.random() * (300)) + 50;
+        const div = document.createElement('div'); div.className = 'gate'; div.style.left = '375px';
+        const t = document.createElement('div'); t.className = 'shark'; t.textContent = '🦈'; t.style.top = (op - 30) + 'px';
+        const b = document.createElement('div'); b.className = 'shark'; b.textContent = '🦈'; b.style.top = (op + g.gap) + 'px';
+        div.appendChild(t); div.appendChild(b); document.getElementById('g-area').appendChild(div);
+        g.gs.push({ el: div, x: 375, t: op, b: op + g.gap, p: false });
+    }
+    function tick() {
+        if (!g.on) return;
+        g.v += 0.38; g.y += g.v;
+        document.getElementById('surfer').style.top = g.y + 'px';
+        if (g.y > 530 || g.y < 35) { initG(); return; }
+        for (let i = g.gs.length - 1; i >= 0; i--) {
+            let o = g.gs[i]; o.x -= 3.5; o.el.style.left = o.x + 'px';
+            if (!o.p && o.x < 40) { o.p = true; g.s++; document.getElementById('g-score').textContent = g.s; if (g.gap > g.min) g.gap -= 4; }
+            if (o.x > 10 && o.x < 70) { if (g.y < o.t || (g.y + 28) > o.b) { initG(); return; } }
+            if (o.x < -50) { o.el.remove(); g.gs.splice(i, 1); }
         }
-        setInterval(runClock, 1000); runClock();
+        g.loop = requestAnimationFrame(tick);
+    }
 
-        /* --- CODE D'ACCÈS --- */
-        function handleKeypress(digit) {
-            if (SYSTEM_DATA.buffer.length < 4) {
-                SYSTEM_DATA.buffer += digit;
-                const dots = document.querySelectorAll('.dot');
-                dots.forEach((d, i) => d.classList.toggle('filled', i < SYSTEM_DATA.buffer.length));
+    // MAP LOGIC
+    let m = null;
+    function initM() {
+        if (m) return;
+        m = L.map('map').setView([43.588224, -1.478083], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(m);
+        L.marker([43.588224, -1.478083], { icon: L.divIcon({html:'🐋', className:'whale-marker', iconSize:[30,30]}) }).addTo(m).bindPopup("Baleine aperçue ici !").openPopup();
+    }
 
-                if (SYSTEM_DATA.buffer.length === 4) {
-                    setTimeout(() => {
-                        if (SYSTEM_DATA.buffer === SYSTEM_DATA.passcode) {
-                            document.getElementById('error-msg').style.visibility = 'hidden';
-                            navigateTo('passcode-screen', 'home-screen');
-                        } else {
-                            document.getElementById('error-msg').style.visibility = 'visible';
-                            SYSTEM_DATA.buffer = "";
-                            dots.forEach(d => d.classList.remove('filled'));
-                        }
-                    }, 250);
-                }
-            }
-        }
-
-        /* --- APPLI MESSAGES --- */
-        function openDiscussion(key) {
-            const data = SYSTEM_DATA.discussions[key];
-            document.getElementById('active-contact-name').textContent = data.name;
-            const container = document.getElementById('chat-messages-container');
-            container.innerHTML = "";
-            
-            data.messages.forEach(m => {
-                const b = document.createElement('div');
-                b.className = `message-bubble ${m.type}`;
-                b.textContent = m.text;
-                container.appendChild(b);
-            });
-            navigateTo('messages-app', 'chat-detail-view');
-            container.scrollTop = container.scrollHeight;
-        }
-
-        /* --- JEU SURF RUSH (Difficulté progressive corrigée) --- */
-        let game = {
-            y: 200, vel: 0, grav: 0.38, jump: -6.8, score: 0,
-            active: false, gates: [], loop: null, spawnInterval: null,
-            initialGap: 140, currentGap: 140, minGap: 95, speed: 3.5
-        };
-
-        function initSurfGame() {
-            stopSurfGame();
-            game.y = 200; game.vel = 0; game.score = 0; game.currentGap = game.initialGap;
-            document.getElementById('surfer').style.top = game.y + 'px';
-            document.getElementById('game-score').textContent = "0";
-            document.getElementById('game-menu').style.display = 'flex';
-            document.querySelectorAll('.shark-gate').forEach(el => el.remove());
-            game.gates = [];
-        }
-
-        function startSurfGame(e) {
-            e.stopPropagation();
-            initSurfGame();
-            document.getElementById('game-menu').style.display = 'none';
-            game.active = true;
-            game.loop = requestAnimationFrame(gameTick);
-            game.spawnInterval = setInterval(spawnGate, 2000);
-        }
-
-        function stopSurfGame() {
-            game.active = false;
-            cancelAnimationFrame(game.loop);
-            clearInterval(game.spawnInterval);
-        }
-
-        function triggerSurferJump() {
-            if (game.active) game.vel = game.jump;
-        }
-
-        function spawnGate() {
-            if (!game.active) return;
-
-            const areaHeight = 560; // Hauteur exploitable du conteneur de jeu
-            // Définir la position de l'ouverture de la porte de manière aléatoire
-            const padding = 60;
-            const openY = Math.floor(Math.random() * (areaHeight - game.currentGap - (padding * 2))) + padding;
-
-            const gateEl = document.createElement('div');
-            gateEl.className = 'shark-gate';
-            gateEl.style.left = '375px'; // Commence en dehors de l'écran droit de l'iPhone
-
-            const topShark = document.createElement('div');
-            topShark.className = 'shark-obstacle';
-            topShark.textContent = '🦈';
-            topShark.style.top = (openY - 30) + 'px'; // Ajustement visuel du requin du haut
-
-            const bottomShark = document.createElement('div');
-            bottomShark.className = 'shark-obstacle';
-            bottomShark.textContent = '🦈';
-            bottomShark.style.top = (openY + game.currentGap) + 'px';
-
-            gateEl.appendChild(topShark);
-            gateEl.appendChild(bottomShark);
-            document.getElementById('game-area').appendChild(gateEl);
-
-            game.gates.push({
-                element: gateEl,
-                x: 375,
-                topLimit: openY,
-                bottomLimit: openY + game.currentGap,
-                passed: false
-            });
-        }
-
-        function gameTick() {
-            if (!game.active) return;
-
-            game.vel += game.grav;
-            game.y += game.vel;
-            
-            const surfer = document.getElementById('surfer');
-            surfer.style.top = game.y + 'px';
-
-            // Crash haut ou bas
-            if (game.y > 530 || game.y < 35) {
-                gameOver(); return;
-            }
-
-            for (let i = game.gates.length - 1; i >= 0; i--) {
-                let g = game.gates[i];
-                g.x -= game.speed;
-                g.element.style.left = g.x + 'px';
-
-                // Succès franchissement
-                if (!g.passed && g.x < 45) {
-                    g.passed = true;
-                    game.score++;
-                    document.getElementById('game-score').textContent = game.score;
-                    
-                    // Augmentation de la difficulté : réduction de l'écartement des requins pour la PROCHAINE porte
-                    if (game.currentGap > game.minGap) {
-                        game.currentGap -= 4; // Réduit l'espace petit à petit
-                    }
-                }
-
-                // Hitbox précise (Largeur surfeur entre X=45 et X=81)
-                if (g.x > 15 && g.x < 75) {
-                    // Si le surfeur tape le requin du haut OU le requin du bas
-                    if (game.y < g.topLimit || (game.y + 28) > g.bottomLimit) {
-                        gameOver(); return;
-                    }
-                }
-
-                // Nettoyage des portes sorties de l'écran
-                if (g.x < -50) {
-                    g.element.remove();
-                    game.gates.splice(i, 1);
-                }
-            }
-            game.loop = requestAnimationFrame(gameTick);
-        }
-
-        function gameOver() {
-            stopSurfGame();
-            document.getElementById('game-menu').style.display = 'flex';
-            document.getElementById('menu-text').innerHTML = `Game Over 🦈<br>Score : ${game.score}`;
-        }
-
-        /* --- APPLI MAPS INTERACTIVE (Leaflet) --- */
-        let mapInstance = null;
-
-        function initMap() {
-            // Sécurité pour éviter de recréer la carte si elle existe déjà
-            if (mapInstance !== null) return; 
-
-            // Coordonnées cibles (Capbreton/Hossegor)
-            const lat = 43.588224;
-            const lng = -1.478083;
-
-            // Initialisation de Leaflet dans la div #map (Focus direct et niveau de zoom à 13)
-            mapInstance = L.map('map').setView([lat, lng], 13);
-
-            // Chargement des tuiles cartographiques de OpenStreetMap (Design clair et fluide)
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(mapInstance);
-
-            // Création d'un marqueur personnalisé en HTML pour afficher l'émoji Baleine
-            const whaleIcon = L.divIcon({
-                html: '🐋',
-                className: 'whale-marker',
-                iconSize: [40, 40],
-                iconAnchor: [20, 20]
-            });
-
-            // Ajout du marqueur sur la carte avec une petite pop-up informative au clic
-            L.marker([lat, lng], { icon: whaleIcon })
-                .addTo(mapInstance)
-                .bindPopup("<b>Point d'intérêt : Spot de Baleines</b><br>Coordonnées validées.")
-                .openPopup();
-        }
-    </script>
+    // CLOCK
+    setInterval(() => { const n = new Date(); document.getElementById('clock').textContent = n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0'); }, 1000);
+</script>
 </body>
 </html>
